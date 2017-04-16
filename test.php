@@ -16,9 +16,9 @@ require('src/secureyou.php');
 
 try {
 	$DBHost = 'localhost';
-	$DBName = 'wallet';
-	$DBUser = 'redsocial2016';
-	$DBPass = 'redsocial2016';
+	$DBName = '';
+	$DBUser = '';
+	$DBPass = '';
 	$_cmd = 'mysql:host=' . $DBHost . ';dbname=' . $DBName;
     $database = new PDO($_cmd, $DBUser, $DBPass);
 } catch (PDOException $e) {
