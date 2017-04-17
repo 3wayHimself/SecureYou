@@ -7,14 +7,27 @@
  */
 
 class SecureYou {
-	function __construct($conn, $key) {
+	function __construct($conn) {
 		$this->db = $conn;
-		$this->key = $key;
 	}
 	function isLogged() {
 		@session_start();
-		if (isset($_SESSION['username'])) {
-			return true;
+		if (isset($_SESSION['session'])) {
+		    $stmt = $this->db->prepare("SELECT * FROM sessions WHERE session = :session");
+		    $stmt->bindParam(':session', $_SESSION['session']);
+		    $stmt->execute();
+
+		    if($stmt->rowCount() > 0){
+		    	$result = $stmt->fetchAll();
+		    	if ($_SESSION['userid'] == $result[0]['uid']) {
+		    		return true;
+		    	} else {
+		    		return false;
+		    	}
+		    	return true;
+		    } else {
+		    	return false;
+		    }
 		} else {
 			return false;
 		}
@@ -22,7 +35,13 @@ class SecureYou {
 	function register($user, $email, $password) {
 		$stmt = $this->db->prepare("INSERT INTO users (email, username, password)VALUES (:email, :username, :password)");
 		$stmt -> execute(array(':email' => $email, ':username' => $user, ':password' => $this->encrypt($password)));
-		$_SESSION['username'] = $this->encrypt($user);
+		$this->login($user, $password);
+	}
+	function createSession($userid) {
+		$session = substr(md5(rand()), 0, 35);
+		$stmt = $this->db->prepare("INSERT INTO sessions (uid, session)VALUES (:uid, :session)");
+		$stmt -> execute(array(':uid' => $userid, ':session' => $session));
+		$_SESSION['session'] = $session;
 	}
 	function login($user, $password) {
 	    $stmt = $this->db->prepare("SELECT username FROM users WHERE username = :name");
@@ -35,9 +54,11 @@ class SecureYou {
 		    $stmt->bindParam(':name', $user);
 		    $stmt->execute();
 		    $result = $stmt->fetchAll();
-		    if ($password == $this->decrypt($result[0]['password'])) {
-		    	$_SESSION['username'] = $this->encrypt($result[0]['username']);
-		    	$_SESSION['user'] = $result[0]['username'];
+		    if (password_verify($password, $result[0]['password'])) {
+		    	$_SESSION['username'] = $user;
+		    	$_SESSION['userid'] = $result[0]['id'];
+		    	$_SESSION['useremail'] = $result[0]['email'];
+		    	$this->createSession($_SESSION['userid']);
 		    	$this->Username = $user;
 		    	return true;
 		    } else {
@@ -76,27 +97,7 @@ class SecureYou {
 	    }
 	}
 	function encrypt($string) {
-		$result = '';
-		$key = $this->key;
-		for($i=0; $i<strlen($string); $i++) {
-			$char = substr($string, $i, 1);
-			$keychar = substr($key, ($i % strlen($key))-1, 1);
-			$char = chr(ord($char)+ord($keychar));
-			$result.=$char;	
-		}
-		return base64_encode($result);
-	}
-	function decrypt($string) {
-		$result = '';
-		$key = $this->key;
-		$string = base64_decode($string);
-		for($i=0; $i<strlen($string); $i++) {
-			$char = substr($string, $i, 1);
-			$keychar = substr($key, ($i % strlen($key))-1, 1);
-			$char = chr(ord($char)-ord($keychar));
-			$result.=$char;
-		}
-		return $result;
+		return password_hash($string, PASSWORD_DEFAULT);
 	}
 }
 
