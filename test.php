@@ -16,9 +16,9 @@ require('src/secureyou.php');
 
 try {
 	$DBHost = 'localhost';
-	$DBName = 'wallet';
-	$DBUser = 'redsocial2016';
-	$DBPass = 'redsocial2016';
+	$DBName = '';
+	$DBUser = '';
+	$DBPass = '';
 	$_cmd = 'mysql:host=' . $DBHost . ';dbname=' . $DBName;
     $database = new PDO($_cmd, $DBUser, $DBPass);
 } catch (PDOException $e) {
@@ -28,9 +28,9 @@ try {
 
 // Class Configuration
 
-$Username = "testingcale2";
-$Email = "testingcale2@gmail.com";
-$Password = 'testingcale2';
+$Username = "Alemalakra";
+$Email = "Alemalakra@gmail.com";
+$Password = 'Alemalakra000';
 $SecureYou = new SecureYou($database);
 $TypeOfAuth = 'Register'; // You Can Use Login
 
