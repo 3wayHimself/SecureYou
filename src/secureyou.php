@@ -34,7 +34,7 @@ class SecureYou {
 	}
 	function register($user, $email, $password) {
 		$stmt = $this->db->prepare("INSERT INTO users (email, username, password)VALUES (:email, :username, :password)");
-		$stmt -> execute(array(':email' => $email, ':username' => $user, ':password' => $this->encrypt($password)));
+		$stmt -> execute(array(':email' => $email, ':username' => $user, ':password' => password_hash($password, PASSWORD_DEFAULT)));
 		$this->login($user, $password);
 	}
 	function createSession($userid) {
@@ -78,26 +78,16 @@ class SecureYou {
 	    $stmt->execute();
 
 	    if($stmt->rowCount() > 0){
-	        $testone = true;
 	        return true;
-	    } else {
-	        $testone = false;
 	    }
-	    if ($testone == true) {
-	    	return true;
-	    } else {
-		    $stmt = $this->db->prepare("SELECT username FROM users WHERE email = :email");
-		    $stmt->bindParam(':email', $email);
-		    $stmt->execute();
-			if($stmt->rowCount() > 0){
-				return true;
-			} else {
-				return false;
-			}
-	    }
-	}
-	function encrypt($string) {
-		return password_hash($string, PASSWORD_DEFAULT);
+		$stmt = $this->db->prepare("SELECT username FROM users WHERE email = :email");
+		$stmt->bindParam(':email', $email);
+		$stmt->execute();
+		if($stmt->rowCount() > 0){
+			return true;
+		} else {
+			return false;
+		}
 	}
 }
 
