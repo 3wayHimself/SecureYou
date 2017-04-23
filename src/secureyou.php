@@ -32,10 +32,48 @@ class SecureYou {
 			return false;
 		}
 	}
+	function isAlphaNumeric($string) {
+		return preg_match("/^[a-zA-Z0-9\s@.]*$/", $string);
+	}
+	function isValidEmail($string) {
+		if(filter_var($string, FILTER_VALIDATE_EMAIL)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	function getMessage() {
+		if (isset($this->Error)) {
+			return $this->Error;
+		} else {
+			return 'No Error To Display';
+		}
+	}
 	function register($user, $email, $password) {
+		if (!($this->isValidEmail($email))) {
+			$this->Error = 'Invalid Email';
+			return false;
+		}
+		if (!(isAlphaNumeric($user))) {
+			$this->Error = 'Username Can Contains Only AlphaNumeric Letters';
+			return false;
+		}
+		if (strlen($user) > 16) {
+			$this->Error = 'Username Can Max 16 Caracters Length';
+			return false;
+		}
+		if (strlen($password) > 32) {
+			$this->Error = 'Password Can Max 32 Caracters Length';
+			return false;
+		}
+		if (strlen($email) > 32) {
+			$this->Error = 'Email Can Max 32 Caracters Length';
+			return false;
+		}
 		$stmt = $this->db->prepare("INSERT INTO users (email, username, password)VALUES (:email, :username, :password)");
 		$stmt -> execute(array(':email' => $email, ':username' => $user, ':password' => password_hash($password, PASSWORD_DEFAULT)));
 		$this->login($user, $password);
+		return true;
 	}
 	function createSession($userid) {
 		$session = substr(md5(rand()), 0, 35);
@@ -44,6 +82,18 @@ class SecureYou {
 		$_SESSION['session'] = $session;
 	}
 	function login($user, $password) {
+		if (strlen($user) > 16) {
+			$this->Error = 'Username Can Max 16 Caracters Length';
+			return false;
+		}
+		if (strlen($password) > 32) {
+			$this->Error = 'Password Can Max 32 Caracters Length';
+			return false;
+		}
+		if (!(isAlphaNumeric($user))) {
+			$this->Error = 'Username Can Contains Only AlphaNumeric Letters';
+			return false;
+		}
 	    $stmt = $this->db->prepare("SELECT username FROM users WHERE username = :name");
 	    $stmt->bindParam(':name', $user);
 	    $stmt->execute();
