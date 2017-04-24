@@ -7,8 +7,18 @@
  */
 
 class SecureYou {
-	function __construct($conn) {
-		$this->db = $conn;
+	function __construct($PDO) {
+		if(!($PDO instanceof PDO)) {
+			die('Inavlid PDO Connection!');
+		}
+		$this->db = $PDO;
+	}
+	function getError() {
+		if (isset($this->Error)) {
+			return $this->Error;
+		} else {
+			return 'No Error To Display';
+		}
 	}
 	function isLogged() {
 		@session_start();
@@ -42,19 +52,12 @@ class SecureYou {
 			return false;
 		}
 	}
-	function getMessage() {
-		if (isset($this->Error)) {
-			return $this->Error;
-		} else {
-			return 'No Error To Display';
-		}
-	}
 	function register($user, $email, $password) {
 		if (!($this->isValidEmail($email))) {
 			$this->Error = 'Invalid Email';
 			return false;
 		}
-		if (!(isAlphaNumeric($user))) {
+		if (!($this->isAlphaNumeric($user))) {
 			$this->Error = 'Username Can Contains Only AlphaNumeric Letters';
 			return false;
 		}
@@ -90,7 +93,7 @@ class SecureYou {
 			$this->Error = 'Password Can Max 32 Caracters Length';
 			return false;
 		}
-		if (!(isAlphaNumeric($user))) {
+		if (!($this->isAlphaNumeric($user))) {
 			$this->Error = 'Username Can Contains Only AlphaNumeric Letters';
 			return false;
 		}
@@ -112,11 +115,13 @@ class SecureYou {
 		    	$this->Username = $user;
 		    	return true;
 		    } else {
+		    	$this->Error = 'Invalid Password';
 		    	return false;
 		    }
 
 
 	    } else {
+	    	$this->Error = 'Username No Exists';
 	        return false;
 	    }
 
