@@ -37,7 +37,6 @@ $TypeOfAuth = 'Register'; // You Can Use Login
 
 
 // Handler
-
 if ($SecureYou->isLogged() == False) {
 	switch ($TypeOfAuth) {
 		case 'Register':
@@ -46,7 +45,7 @@ if ($SecureYou->isLogged() == False) {
 					if ($SecureYou->register($Username, $Email, $Password) == true) {
 						echo 'Registred With User: ' . $Username;
 					} else {
-						echo 'Error Registring: ' . $SecureYou->getMessage();
+						echo 'Error Registring: ' . $SecureYou->getError();
 					}
 				} else {
 					echo 'Username Alredy Exists!';
@@ -58,7 +57,7 @@ if ($SecureYou->isLogged() == False) {
 				if ($SecureYou->login($Username, $Password) == true) {
 					echo 'Logged Now With Username: ' . $Username;
 				} else {
-					echo 'Error On Login: ' . $SecureYou->getMessage();
+					echo 'Error On Login: ' . $SecureYou->getError();
 				}
 			} else {
 				echo 'Username no Exist!';
